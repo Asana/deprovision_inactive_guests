@@ -1,0 +1,19 @@
+{
+  "name": "deprovision_inactive_guests",
+  "version": "1.0.0",
+  "description": "A small script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Asana/deprovision_inactive_guests.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Asana/deprovision_inactive_guests/issues"
+  },
+  "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme"
+}
