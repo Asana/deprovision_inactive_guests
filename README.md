@@ -11,4 +11,4 @@ Obtain a signed url for csv export of the members of the domain. Only asana engi
 # To Run
 npm install
 
-node index.js <service account token> <csv export url>
+node index.js &lt;service account token&gt; &lt;csv export url&gt;
