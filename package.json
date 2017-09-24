@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Asana/deprovision_inactive_guests/issues"
   },
-  "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme"
+  "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme",
+  "dependencies": {
+    "asana": "^0.15.0"
+  }
 }
