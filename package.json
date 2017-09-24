@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme",
   "dependencies": {
-    "asana": "^0.15.0"
+    "asana": "^0.15.0",
+    "csv-parser": "^1.11.0",
+    "moment": "^2.18.1",
+    "request-promise": "^4.2.2"
   }
 }
