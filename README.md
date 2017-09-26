@@ -12,7 +12,7 @@ A small script which uses the Asana API to remove external users (ie without a c
 npm install
 
 Dry run (displays which users would be deprovisioned):
-node index.js &lt;service account token&gt; &lt;csv export url&gt; &lt;organization id&gt;
+> `node index.js <service account token> <csv export url> <organization id>`
 
 Actually deprovision those users:
-node index.js &lt;service account token&gt; &lt;csv export url&gt; &lt;organization id&gt; action
+> `node index.js <service account token> <csv export url> <organization id> action`
