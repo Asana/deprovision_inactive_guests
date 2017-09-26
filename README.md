@@ -11,4 +11,8 @@ Obtain a signed url for csv export of the members of the domain. Only asana engi
 # To Run
 npm install
 
-node index.js &lt;service account token&gt; &lt;csv export url&gt;
+Dry run (displays which users would be deprovisioned):
+node index.js &lt;service account token&gt; &lt;csv export url&gt; &lt;organization id&gt;
+
+Actually deprovision those users:
+node index.js &lt;service account token&gt; &lt;csv export url&gt; &lt;organization id&gt; action
