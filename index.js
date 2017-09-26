@@ -1,31 +1,6 @@
 var asana = require('asana');
 var Bluebird = require('bluebird');
-var csv = require("csv-parser");
-var fs = require("fs");
 var moment = require('moment');
-var request = require('request-promise');
-
-var loadRemoteCsv = function(url) {
-    console.log("Downloading remote csv file", url);
-    return loadCsv(request(url));
-};
-
-var loadCsv = function(stream) {
-    return new Bluebird(function(resolve, reject) {
-        var rows = [];
-
-        stream.pipe(csv())
-            .on("data", function (data) {
-                rows.push(data);
-            })
-            .on("end", function () {
-                resolve(rows);
-            })
-            .on("error", function (err) {
-                reject(err);
-            });
-    });
-};
 
 var createAsanaClient = function() {
     var accessToken = process.argv[2];
@@ -33,12 +8,11 @@ var createAsanaClient = function() {
     return asana.Client.create().useAccessToken(accessToken);
 };
 
-var deprovisionFunc = function() {
-    var organization_id = process.argv[4];
-    console.log("Will deprovision from", organization_id);
-    var asanaClient = createAsanaClient();
+var deprovisionFunc = function(asanaClient) {
+    var organizationId = process.argv[3];
+    console.log("Will deprovision from", organizationId);
     return function(email) {
-        return asanaClient.workspaces.removeUser(organization_id, {
+        return asanaClient.workspaces.removeUser(organizationId, {
             user: email
         }).then(function() {
             console.log("Successfully deprovisioned", email);
@@ -51,10 +25,18 @@ var deprovisionFunc = function() {
 /**
  * Returns guest users who haven't logged in for over a month by email address
  */
-var usersToDeprovision = function(csv) {
+var usersToDeprovision = function(asanaClient) {
     var oneMonthAgo = moment().subtract(1, "months");
+    var organizationId = process.argv[3];
 
-    return csv.then(function(data) {
+    var users = asanaClient.users.findByWorkspace(organizationId, {
+        opt_fields: "last_active_at,is_guest,email",
+        domain: organizationId
+    });
+
+    return users.then(function(data) {
+        console.log("data", data)
+        throw "boom"
         var guests = data.filter(function(row) {
             return row["Internal"] === "false";
         });
@@ -76,10 +58,15 @@ var usersToDeprovision = function(csv) {
 };
 
 var main = function() {
+    var asanaClient = createAsanaClient();
     var deprovision = deprovisionFunc();
 
-    var csvData = loadRemoteCsv(process.argv[3]);
-    usersToDeprovision(csvData).then(deprovision);
+    usersToDeprovision(asanaClient).then(function(emails) {
+        emails.forEach(function(email) {
+            console.log("Deprovisioning", email);
+            // deprovision
+        })
+    });
 };
 
 main();
