@@ -1,7 +1,6 @@
 var asana = require('asana');
 var Bluebird = require('bluebird');
 var csv = require("csv-parser");
-var fs = require("fs");
 var moment = require('moment');
 var request = require('request-promise');
 
@@ -34,11 +33,11 @@ var createAsanaClient = function() {
 };
 
 var deprovisionFunc = function() {
-    var organization_id = process.argv[4];
-    console.log("Will deprovision from", organization_id);
+    var organizationId = process.argv[4];
+    console.log("Will deprovision from", organizationId);
     var asanaClient = createAsanaClient();
     return function(email) {
-        return asanaClient.workspaces.removeUser(organization_id, {
+        return asanaClient.workspaces.removeUser(organizationId, {
             user: email
         }).then(function() {
             console.log("Successfully deprovisioned", email);
@@ -55,7 +54,11 @@ var usersToDeprovision = function(csv) {
     var oneMonthAgo = moment().subtract(1, "months");
 
     return csv.then(function(data) {
-        var guests = data.filter(function(row) {
+        var realUsers = data.filter(function(row) {
+            return row["Email Address"] !== "";
+        });
+
+        var guests = realUsers.filter(function(row) {
             return row["Internal"] === "false";
         });
 
@@ -76,10 +79,28 @@ var usersToDeprovision = function(csv) {
 };
 
 var main = function() {
+    if (process.argv.length < 5 || process.argv.length > 6) {
+        console.log("Usage:");
+        console.log("node index.js <service account token> <member export csv url> <organization id> [action]");
+    }
+
+    if (process.argv[5] !== "action") {
+        console.log("In dry-run mode. Add 'action' to the command line to actually deprovision users");
+    }
+
     var deprovision = deprovisionFunc();
 
     var csvData = loadRemoteCsv(process.argv[3]);
-    usersToDeprovision(csvData).then(deprovision);
+    usersToDeprovision(csvData).then(function (emails) {
+        emails.forEach(function (email) {
+            if (process.argv[5] === "action") {
+                console.log("Deprovisioning", email);
+                deprovision(email);
+            } else {
+                console.log("Planning to deprovision", email);
+            }
+        })
+    });
 };
 
 main();
