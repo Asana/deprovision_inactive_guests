@@ -25,6 +25,7 @@ There are two ways to run the script.
 
 ### Providing options in arguments
 
+<<<<<<< HEAD
 You can run the script by setting all required options:
 
 Dry run (displays which users would be deprovisioned):
