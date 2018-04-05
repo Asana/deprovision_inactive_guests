@@ -35,7 +35,7 @@ Actually deprovision those users:
 
 > `node index.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days> --mode action`
 
-### 2. Entering options in respons to prompts
+### 2. Entering options in response to prompts
 
 Or you can run the script without options and simply type in the correct information information when prompted:
 
