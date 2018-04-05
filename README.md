@@ -37,7 +37,7 @@ Actually deprovision those users:
 
 ### 2. Entering options in response to prompts
 
-Or you can run the script without options and simply type in the correct information information when prompted:
+Or you can run the script without arguments and simply type in the correct information information when prompted:
 
 > `node index.js`
 
