@@ -29,17 +29,17 @@ You can run the script by setting all required options:
 
 Dry run (displays which users would be deprovisioned):
 
-> `node index.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days>`
+> `node depro-inactive-guests.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days>`
 
 Actually deprovision those users:
 
-> `node index.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days> --mode action`
+> `node depro-inactive-guests.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days> --mode action`
 
 ### 2. Entering options in response to prompts
 
 Or you can run the script without arguments and simply type in the correct information when prompted:
 
-> `node index.js`
+> `node depro-inactive-guests.js`
 
 Note that this is the same as executing one of the built binaries.
 
