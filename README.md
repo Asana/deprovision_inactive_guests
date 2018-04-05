@@ -1,6 +1,6 @@
 # deprovision_inactive_guests
 
-A small node script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days.
+A small node script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for set number of days.
 
 ## To Develop
 
