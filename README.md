@@ -21,11 +21,10 @@ To build binarys, use `npm run build`.
 
 ### Running
 
-There are two ways to run the script.
+There are two ways to run the script:
 
-### Providing options in arguments
+### 1. Providing options as arguments
 
-<<<<<<< HEAD
 You can run the script by setting all required options:
 
 Dry run (displays which users would be deprovisioned):
@@ -36,7 +35,7 @@ Actually deprovision those users:
 
 > `node index.js --auth <service account token> --csv <csv export url or file path> --organization_id <organization id> --threshold <# of inactive days> --mode action`
 
-### Entering options in respons to prompts
+### 2. Entering options in respons to prompts
 
 Or you can run the script without options and simply type in the correct information information when prompted:
 
