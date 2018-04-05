@@ -33,9 +33,3 @@ The script will prompt you for the information it needs:
 * Organization ID
 * Threshold (number of inactive days we count as being an "inactive guest")
 * Mode ("dry" run or "action" run)
-
-Dry run (displays which users would be deprovisioned):
-> `node index.js --auth <service account token> --csv <csv export url or file path> --domain <organization id> --threshold <# of inactive days>`
-
-Actually deprovision those users:
-> `node index.js --auth <service account token> --csv <csv export url or file path> --domain <organization id> --threshold <# of inactive days> --mode action`
