@@ -4,7 +4,8 @@
     "description": "A small script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days",
     "main": "index.js",
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "build": "pkg depro-inactive-guests.js --out-path ./dist"
     },
     "repository": {
         "type": "git",
@@ -21,9 +22,11 @@
         "commander": "^2.15.1",
         "csv-parser": "^1.12.1",
         "moment": "^2.22.0",
+        "prompt": "^1.0.0",
         "request-promise": "^4.2.2"
     },
     "devDependencies": {
-        "jest": "^22.4.3"
+        "jest": "^22.4.3",
+        "pkg": "^4.3.1"
     }
 }
