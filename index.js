@@ -1,106 +1,157 @@
-var asana = require('asana');
-var Bluebird = require('bluebird');
-var csv = require("csv-parser");
-var moment = require('moment');
-var request = require('request-promise');
+const asana = require("asana");
+const csv = require("csv-parser");
+const moment = require("moment");
+const request = require("request-promise");
+const commander = require("commander");
+const fs = require("fs");
 
-var loadRemoteCsv = function(url) {
+const loadRemoteCsv = url => {
     console.log("Downloading remote csv file", url);
     return loadCsv(request(url));
 };
 
-var loadCsv = function(stream) {
-    return new Bluebird(function(resolve, reject) {
-        var rows = [];
+const loadLocalCsv = path => {
+    console.log("Reading local csv file", path);
 
-        stream.pipe(csv())
-            .on("data", function (data) {
+    return loadCsv(fs.createReadStream(path));
+};
+
+const loadCsv = stream => {
+    return new Promise((resolve, reject) => {
+        const rows = [];
+
+        stream
+            .pipe(csv())
+            .on("data", data => {
                 rows.push(data);
             })
-            .on("end", function () {
+            .on("end", () => {
                 resolve(rows);
             })
-            .on("error", function (err) {
+            .on("error", err => {
                 reject(err);
             });
     });
 };
 
-var createAsanaClient = function() {
-    var accessToken = process.argv[2];
-    console.log("Loading Asana API with access token", accessToken);
-    return asana.Client.create().useAccessToken(accessToken);
+const createAsanaClient = token => {
+    console.log("Loading Asana API with access token", token);
+    return asana.Client.create({}).useAccessToken(token);
 };
 
-var deprovisionFunc = function() {
-    var organizationId = process.argv[4];
-    console.log("Will deprovision from", organizationId);
-    var asanaClient = createAsanaClient();
-    return function(email) {
-        return asanaClient.workspaces.removeUser(organizationId, {
-            user: email
-        }).then(function() {
-            console.log("Successfully deprovisioned", email);
-        }).catch(function(ex) {
-            console.log("Error while deprovisioning", email, ex.value.errors)
-        });
-    }
+const deprovisionFunc = (asanaClient, domain) => {
+    console.log("Will deprovision from", domain);
+    return email => {
+        return asanaClient.workspaces
+            .removeUser(domain, {
+                user: email
+            })
+            .then(() => {
+                console.log("Successfully deprovisioned", email);
+            })
+            .catch(ex => {
+                console.log("Error while deprovisioning", email, ex.value.errors);
+            });
+    };
 };
 
 /**
  * Returns guest users who haven't logged in for over a month by email address
  */
-var usersToDeprovision = function(csv) {
-    var oneMonthAgo = moment().subtract(1, "months");
+const usersToDeprovision = (csv, days) => {
+    const threshold = moment().subtract(days, "days");
 
-    return csv.then(function(data) {
-        var realUsers = data.filter(function(row) {
+    return csv.then(data => {
+        const realUsers = data.filter(row => {
             return row["Email Address"] !== "";
         });
 
-        var guests = realUsers.filter(function(row) {
+        const guests = realUsers.filter(row => {
             return row["Internal"] === "false";
         });
 
-        var rowsToDeprovision = guests.filter(function(row) {
-            var lastActivityMoment = moment(row["Last Activity"]);
+        const rowsToDeprovision = guests.filter(row => {
+            let lastActivityMoment = moment(row["Last Activity"]);
 
             if (!lastActivityMoment.isValid()) {
                 // Probably hasn't logged in, fall back to invitation date instead
                 lastActivityMoment = moment(row["Date Joined Organization"]);
             }
-            return lastActivityMoment.isBefore(oneMonthAgo);
+            return lastActivityMoment.isBefore(threshold);
         });
 
-        return rowsToDeprovision.map(function(row) {
+        return rowsToDeprovision.map(row => {
             return row["Email Address"];
         });
     });
 };
 
-var main = function() {
-    if (process.argv.length < 5 || process.argv.length > 6) {
-        console.log("Usage:");
-        console.log("node index.js <service account token> <member export csv url> <organization id> [action]");
+const main = () => {
+    // 1. Take user inputs from options
+    commander
+        .version("0.0.2")
+        .option("-a, --auth <token>", "Service account token")
+        .option("-c, --csv <path>", "Path to member csv file")
+        .option("-d, --domain <domainId>", "Organization or Workspace domain ID")
+        .option("-t, --threshold <#>", "# of days inactive threshold", parseInt)
+        .option("-m, --mode ['dry' or 'action']", "mode to run the script in")
+        .parse(process.argv);
+
+    // 2. Validate inputs
+    if (!commander.auth) {
+        console.log("Please set the `--auth` option with a service account token");
+        return;
+    }
+    if (!commander.csv) {
+        console.log("Please set the`--csv` option with a path or URL to a CSV file");
+        return;
+    }
+    if (!commander.domain) {
+        console.log("Please set a the `--domain` option with your domain ID");
+        return;
+    }
+    if (!commander.threshold) {
+        console.log(
+            "Please set a the `--threshold` option with the number of days of inactivity you'd like to count as being inactive"
+        );
+        return;
+    }
+    if (commander.mode !== "action") {
+        console.log("In dry-run mode. set --mode option to 'action' to actually deprovision users");
     }
 
-    if (process.argv[5] !== "action") {
-        console.log("In dry-run mode. Add 'action' to the command line to actually deprovision users");
-    }
+    // 3. Process CSV
+    const csvData = commander.csv.includes("https://")
+        ? loadRemoteCsv(commander.csv)
+        : loadLocalCsv(commander.csv);
 
-    var deprovision = deprovisionFunc();
+    // 4. Create Asana client
+    const asanaClient = createAsanaClient(commander.auth);
 
-    var csvData = loadRemoteCsv(process.argv[3]);
-    usersToDeprovision(csvData).then(function (emails) {
-        emails.forEach(function (email) {
-            if (process.argv[5] === "action") {
-                console.log("Deprovisioning", email);
-                deprovision(email);
-            } else {
-                console.log("Planning to deprovision", email);
-            }
-        })
+    // 5. Set up deprovision function
+    const deprovision = deprovisionFunc(asanaClient, commander.domain);
+
+    // 6. Deprovision users
+    usersToDeprovision(csvData, commander.threshold).then(emails => {
+        if (emails.length > 0) {
+            emails.forEach(email => {
+                if (commander.mode === "action") {
+                    console.log("Deprovisioning", email);
+                    deprovision(email);
+                } else {
+                    console.log("Planning to deprovision", email);
+                }
+            });
+        } else {
+            console.log("No one will be deprovisioned.");
+        }
     });
 };
 
 main();
+
+module.exports = {
+    loadCsv,
+    deprovisionFunc,
+    usersToDeprovision
+};
