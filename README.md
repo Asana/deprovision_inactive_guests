@@ -10,7 +10,7 @@ A small node script which uses the Asana API to remove external users (ie withou
 
 To test, run `npm run test`.
 
-To build binarys, use `npm run build`.
+To build the binaries, use `npm run build`.
 
 ## To Run
 
