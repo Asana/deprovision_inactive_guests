@@ -127,7 +127,7 @@ const main = () => {
         .parse(process.argv);
 
     if (commander.rawArgs.length > 2) {
-        // We've been given options, lets check those and then and then process those through
+        // We've been given options, lets check those and then process those through
         if (!commander.auth) {
             console.log("Please set the `--auth` option with a service account token");
             return;
