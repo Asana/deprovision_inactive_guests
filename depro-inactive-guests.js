@@ -2,7 +2,7 @@ const asana = require("asana");
 const csv = require("csv-parser");
 const moment = require("moment");
 const request = require("request-promise");
-const commander = require("commander");
+const prompt = require("prompt");
 const fs = require("fs");
 
 const loadRemoteCsv = url => {
@@ -87,64 +87,70 @@ const usersToDeprovision = (csv, days) => {
 };
 
 const main = () => {
-    // 1. Take user inputs from options
-    commander
-        .version("0.0.2")
-        .option("-a, --auth <token>", "Service account token")
-        .option("-c, --csv <path>", "Path to member csv file")
-        .option("-d, --domain <domainId>", "Organization or Workspace domain ID")
-        .option("-t, --threshold <#>", "# of days inactive threshold", parseInt)
-        .option("-m, --mode ['dry' or 'action']", "mode to run the script in")
-        .parse(process.argv);
-
-    // 2. Validate inputs
-    if (!commander.auth) {
-        console.log("Please set the `--auth` option with a service account token");
-        return;
-    }
-    if (!commander.csv) {
-        console.log("Please set the`--csv` option with a path or URL to a CSV file");
-        return;
-    }
-    if (!commander.domain) {
-        console.log("Please set a the `--domain` option with your domain ID");
-        return;
-    }
-    if (!commander.threshold) {
-        console.log(
-            "Please set a the `--threshold` option with the number of days of inactivity you'd like to count as being inactive"
-        );
-        return;
-    }
-    if (commander.mode !== "action") {
-        console.log("In dry-run mode. set --mode option to 'action' to actually deprovision users");
-    }
-
-    // 3. Process CSV
-    const csvData = commander.csv.includes("https://")
-        ? loadRemoteCsv(commander.csv)
-        : loadLocalCsv(commander.csv);
-
-    // 4. Create Asana client
-    const asanaClient = createAsanaClient(commander.auth);
-
-    // 5. Set up deprovision function
-    const deprovision = deprovisionFunc(asanaClient, commander.domain);
-
-    // 6. Deprovision users
-    usersToDeprovision(csvData, commander.threshold).then(emails => {
-        if (emails.length > 0) {
-            emails.forEach(email => {
-                if (commander.mode === "action") {
-                    console.log("Deprovisioning", email);
-                    deprovision(email);
-                } else {
-                    console.log("Planning to deprovision", email);
-                }
-            });
-        } else {
-            console.log("No one will be deprovisioned.");
+    // 1. Define schema
+    const schema = {
+        properties: {
+            token: {
+                message: "please enter a valid service account token",
+                pattern: /^0\//,
+                required: true
+            },
+            csv: {
+                message: "absolute path or url to csv file",
+                required: true
+            },
+            organization_id: {
+                message: "please enter a valid organization id",
+                pattern: /^[1-9]\d*$/,
+                required: true
+            },
+            threshold: {
+                message: "number of days inactive",
+                required: true
+            },
+            mode: {
+                message: "mode (dry or action)",
+                required: false
+            }
         }
+    };
+
+    // 2. Prompt user for inputs
+    prompt.colors = false;
+    prompt.message = "";
+    prompt.start();
+
+    prompt.get(schema, (err, inputs) => {
+        if (err) {
+            throw err;
+        }
+
+        // 3. Process CSV
+        const csvData = inputs.csv.includes("https://")
+            ? loadRemoteCsv(inputs.csv)
+            : loadLocalCsv(inputs.csv);
+
+        // 4. Create Asana client
+        const asanaClient = createAsanaClient(inputs.token);
+
+        // 5. Set up deprovision function
+        const deprovision = deprovisionFunc(asanaClient, inputs.organization_id);
+
+        // 6. Deprovision users
+        usersToDeprovision(csvData, inputs.threshold).then(emails => {
+            if (emails.length > 0) {
+                emails.forEach(email => {
+                    if (inputs.mode === "action") {
+                        console.log("Deprovisioning", email);
+                        deprovision(email);
+                    } else {
+                        console.log("Planning to deprovision", email);
+                    }
+                });
+            } else {
+                console.log("No one will be deprovisioned.");
+            }
+        });
     });
 };
 
