@@ -1,6 +1,6 @@
 const fs = require("fs");
-const index = require("./depro-inactive-guests");
-const fixtures = require("./fixtures/fixtures");
+const index = require("./../depro-inactive-guests");
+const fixtures = require("./../fixtures/fixtures");
 
 describe("Processes a local CSV correctly", () => {
     // setup
