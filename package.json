@@ -1,25 +1,32 @@
 {
-  "name": "deprovision_inactive_guests",
-  "version": "1.0.0",
-  "description": "A small script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Asana/deprovision_inactive_guests.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Asana/deprovision_inactive_guests/issues"
-  },
-  "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme",
-  "dependencies": {
-    "asana": "^0.15.0",
-    "csv-parser": "^1.11.0",
-    "moment": "^2.18.1",
-    "request-promise": "^4.2.2"
-  }
+    "name": "deprovision_inactive_guests",
+    "version": "1.0.0",
+    "description": "A small script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days",
+    "main": "depro-inactive-guests",
+    "scripts": {
+        "test": "jest ./tests/depro-inactive-guests.test.js",
+        "build": "pkg depro-inactive-guests.js --out-path ./dist"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Asana/deprovision_inactive_guests.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Asana/deprovision_inactive_guests/issues"
+    },
+    "homepage": "https://github.com/Asana/deprovision_inactive_guests#readme",
+    "dependencies": {
+        "asana": "^0.15.1",
+        "commander": "^2.15.1",
+        "csv-parser": "^1.12.1",
+        "moment": "^2.22.0",
+        "prompt": "^1.0.0",
+        "request-promise": "^4.2.2"
+    },
+    "devDependencies": {
+        "jest": "^22.4.3",
+        "pkg": "^4.3.1"
+    }
 }
