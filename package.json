@@ -2,7 +2,7 @@
     "name": "deprovision_inactive_guests",
     "version": "1.0.0",
     "description": "A small script which uses the Asana API to remove external users (ie without a company email) from an organization if they haven't logged in for 30 days",
-    "main": "index.js",
+    "main": "depro-inactive-guests",
     "scripts": {
         "test": "jest",
         "build": "pkg depro-inactive-guests.js --out-path ./dist"

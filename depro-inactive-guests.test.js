@@ -1,13 +1,11 @@
 const fs = require("fs");
-const index = require("./index");
+const index = require("./depro-inactive-guests");
 const fixtures = require("./fixtures/fixtures");
-const asana = require("asana");
 
 describe("Processes a local CSV correctly", () => {
     // setup
     const csv = fs.createReadStream("./fixtures/test.csv");
     const parsedCsv = fixtures.parsedCsv;
-    jest.mock("asana");
 
     test("Given a valid csv, loadCsv resolves with data", () => {
         expect.assertions(1);

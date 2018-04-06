@@ -57,7 +57,7 @@ const deprovisionFunc = (asanaClient, domain) => {
 };
 
 /**
- * Returns guest users who haven't logged in for over a month by email address
+ * Returns list of emails addresses for guest users who haven't logged in for over the threshold
  */
 const usersToDeprovision = (csv, days) => {
     const threshold = moment().subtract(days, "days");
@@ -137,7 +137,7 @@ const main = () => {
             return;
         }
         if (!commander.organization_id) {
-            console.log("Please set a the `--domain` option with your domain ID");
+            console.log("Please set a the `--organization_id` option with your domain ID");
             return;
         }
         if (!commander.threshold) {
